@@ -141,7 +141,6 @@ public class LoginActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(LoginActivity.this, "Account doesn't exist.", Toast.LENGTH_SHORT).show();
                     loadingBar.dismiss();
-                    ;
 
                 }
             }
