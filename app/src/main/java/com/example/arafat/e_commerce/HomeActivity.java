@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.text.TextUtils;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -13,7 +14,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.arafat.e_commerce.Prevalent.Prevalent;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.paperdb.Paper;
 
 public class HomeActivity extends AppCompatActivity
@@ -47,6 +53,25 @@ public class HomeActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        View headerView = navigationView.getHeaderView(0);
+        TextView userNameTextView = headerView.findViewById(R.id.user_profile_name);
+        CircleImageView profileImageView = headerView.findViewById(R.id.user_profile_image);
+
+
+
+        /*if (TextUtils.isEmpty(userName)) {
+            Toast.makeText(this, "Sorry about that", Toast.LENGTH_SHORT).show();
+        } else {
+            userNameTextView.setText(userName);
+
+        }*/
+        try{
+            String userName = Prevalent.currentOnlineUser.getName();
+            userNameTextView.setText(userName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -103,10 +128,6 @@ public class HomeActivity extends AppCompatActivity
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
 
         }
 
