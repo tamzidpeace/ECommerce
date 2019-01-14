@@ -86,6 +86,8 @@ public class HomeActivity extends AppCompatActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        Picasso.get().load(Prevalent.currentOnlineUser.getImage()).placeholder(R.drawable.profile).into(profileImageView);
     }
 
     @Override
@@ -169,6 +171,8 @@ public class HomeActivity extends AppCompatActivity
         } else if (id == R.id.nav_categories) {
 
         } else if (id == R.id.nav_settings) {
+
+            startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
 
         } else if (id == R.id.nav_logout) {
 
