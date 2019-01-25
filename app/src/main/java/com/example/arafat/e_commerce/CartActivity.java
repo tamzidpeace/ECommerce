@@ -45,10 +45,10 @@ public class CartActivity extends AppCompatActivity {
         NextProcessBtn = findViewById(R.id.next_process_btn);
         textTotalAmount = findViewById(R.id.total_price);
 
+
         NextProcessBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                textTotalAmount.setText(String.valueOf(totalPrice));
                 Intent intent = new Intent(CartActivity.this, ConfirmFinalOrder.class);
                 intent.putExtra("Total Price", String.valueOf(totalPrice));
                 startActivity(intent);
@@ -61,6 +61,7 @@ public class CartActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+
         final DatabaseReference cartListRef = FirebaseDatabase.getInstance().getReference().child("Cart List");
         FirebaseRecyclerOptions<Cart> options = new FirebaseRecyclerOptions.Builder<Cart>()
                 .setQuery(cartListRef.child("User View")
@@ -70,11 +71,12 @@ public class CartActivity extends AppCompatActivity {
         FirebaseRecyclerAdapter<Cart, CartViewHolder> adapter = new FirebaseRecyclerAdapter<Cart, CartViewHolder>(options) {
             @Override
             protected void onBindViewHolder(@NonNull CartViewHolder holder, int position, @NonNull final Cart model) {
-                holder.txtProductQuantity.setText(model.getQuantity());
-                holder.txtProductPrice.setText(model.getPrice());
+                holder.txtProductQuantity.setText("Amount: " + model.getQuantity());
+                holder.txtProductPrice.setText("Price per amount: " + model.getPrice() + "$");
                 holder.txtProductName.setText(model.getPname());
                 int oneTypeProductTPrice = Integer.valueOf(model.getPrice()) * Integer.valueOf(model.getQuantity());
                 totalPrice += oneTypeProductTPrice;
+                textTotalAmount.setText("Total Price: " + String.valueOf(totalPrice) + "$");
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
