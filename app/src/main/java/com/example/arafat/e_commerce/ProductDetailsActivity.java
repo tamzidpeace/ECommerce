@@ -32,7 +32,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private ImageView productImage;
     private ElegantNumberButton numberButton;
     private TextView productPrice, productDescription, productName;
-    private String productID = "";
+    private String productID = "", state = "Normal";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,55 +57,65 @@ public class ProductDetailsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                String numOfProducts = numberButton.getNumber();
+                if (state.equals("Order Placed") || state.equals("Order Placed")) {
+                    Toast.makeText(ProductDetailsActivity.this, "You can add more product.", Toast.LENGTH_SHORT).show();
+                } else {
+                    String numOfProducts = numberButton.getNumber();
                 /*Toast.makeText(ProductDetailsActivity.this, numOfProducts + " items have been added to cart",
                         Toast.LENGTH_SHORT).show();*/
 
-                String saveCurrentTime, saveCurrentDate;
+                    String saveCurrentTime, saveCurrentDate;
 
-                Calendar calForDate = Calendar.getInstance();
-                SimpleDateFormat currentDate = new SimpleDateFormat("MMM dd, yyyy");
-                saveCurrentDate = currentDate.format(calForDate.getTime());
+                    Calendar calForDate = Calendar.getInstance();
+                    SimpleDateFormat currentDate = new SimpleDateFormat("MMM dd, yyyy");
+                    saveCurrentDate = currentDate.format(calForDate.getTime());
 
-                SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm:ss a");
-                saveCurrentTime = currentTime.format(calForDate.getTime());
+                    SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm:ss a");
+                    saveCurrentTime = currentTime.format(calForDate.getTime());
 
-                final DatabaseReference cartListRef = FirebaseDatabase.getInstance().getReference().child("Cart List");
+                    final DatabaseReference cartListRef = FirebaseDatabase.getInstance().getReference().child("Cart List");
 
-                final HashMap<String, Object> cartMap = new HashMap<>();
+                    final HashMap<String, Object> cartMap = new HashMap<>();
 
-                cartMap.put("pid", productID);
-                cartMap.put("pname", productName.getText().toString().trim());
-                cartMap.put("price", productPrice.getText().toString().trim());
-                cartMap.put("date", saveCurrentDate);
-                cartMap.put("time", saveCurrentTime);
-                cartMap.put("quantity", numOfProducts);
-                cartMap.put("discount", "N/A");
+                    cartMap.put("pid", productID);
+                    cartMap.put("pname", productName.getText().toString().trim());
+                    cartMap.put("price", productPrice.getText().toString().trim());
+                    cartMap.put("date", saveCurrentDate);
+                    cartMap.put("time", saveCurrentTime);
+                    cartMap.put("quantity", numOfProducts);
+                    cartMap.put("discount", "N/A");
 
-                cartListRef.child("User View").child(Prevalent.currentOnlineUser.getPhone())
-                        .child("Products").child(productID)
-                        .updateChildren(cartMap)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
+                    cartListRef.child("User View").child(Prevalent.currentOnlineUser.getPhone())
+                            .child("Products").child(productID)
+                            .updateChildren(cartMap)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
 
-                                if (task.isSuccessful()) {
+                                    if (task.isSuccessful()) {
 
-                                    cartListRef.child("Admin View").child(Prevalent.currentOnlineUser.getPhone())
-                                            .child("Products").child(productID)
-                                            .updateChildren(cartMap)
-                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
+                                        cartListRef.child("Admin View").child(Prevalent.currentOnlineUser.getPhone())
+                                                .child("Products").child(productID)
+                                                .updateChildren(cartMap)
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
 
-                                                    if (task.isSuccessful()) {
-                                                        Toast.makeText(ProductDetailsActivity.this, "Product Has been added to cart", Toast.LENGTH_SHORT).show();
+                                                        if (task.isSuccessful()) {
+                                                            Toast.makeText(ProductDetailsActivity.this, "Product Has been added to cart", Toast.LENGTH_SHORT).show();
+                                                        }
                                                     }
-                                                }
-                                            });
+                                                });
+                                    }
                                 }
-                            }
-                        });
+                            });
+
+
+                }
+
+
+                /////
+
             }
         });
 
@@ -116,6 +126,13 @@ public class ProductDetailsActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        CheckOrderState();
     }
 
     private void getProductDetails(String productID) {
@@ -144,5 +161,30 @@ public class ProductDetailsActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void CheckOrderState() {
+        DatabaseReference orderRef;
+        orderRef = FirebaseDatabase.getInstance().getReference()
+                .child("Orders")
+                .child(Prevalent.currentOnlineUser.getPhone());
+        orderRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String shippingState = dataSnapshot.child("state").getValue().toString();
+                    if (shippingState.equals("shipped")) {
+                        state = "Order Shipped";
+                    } else if (shippingState.equals("Not Shiped")) {
+                        state = "Order Placed";
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }
